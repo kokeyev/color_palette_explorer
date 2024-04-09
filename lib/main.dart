@@ -1,16 +1,32 @@
+
+import 'package:flutter/services.dart';
+
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+
 import 'package:flutter/material.dart';
-import 'package:hexcolor/hexcolor.dart';
 import 'generate.dart';
+import 'header.dart';
 
 
-void main() {
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: FirebaseOptions(
+        apiKey: "AIzaSyBcDsC7ZQCA6nrKJMs8_6FhIhEsg0LcoCw",
+        projectId: "nfactorial-b0fed",
+        messagingSenderId: "425186333795",
+        appId: "1:425186333795:web:42c0aa52dcd2d0202f9456"
+    )
+  );
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -32,14 +48,13 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
 
-
+  CollectionReference collRef = FirebaseFirestore.instance.collection('card');
 
   int hovered_index = -1;
   List<int> is_hovered = [-1, -1];
@@ -66,45 +81,63 @@ class _MyHomePageState extends State<MyHomePage> {
     "Warm", "Cold", "Bright", "Dark", "Pastel", "Vintage", "Monochromatic", "Gradient", "Rainbow",
   ];
 
-  List<Color> _list1 = [
-    HexColor("#CDB4DB"),
-    HexColor("#ffc8dd"),
-    HexColor("#ffafcc"),
-    HexColor("#cdb4db"),
-    HexColor("#a2d2ff"),
-  ];
 
-  List<Color> _list2 = [
-    HexColor("#cdb4db"),
-    HexColor("#a2d2ff"),
-    HexColor("#CDB4DB"),
-    HexColor("#ffc8dd"),
-    HexColor("#ffafcc"),
-  ];
 
-  List<List> _list = [];
+  List _list = [];
+
+  _string_to_hexcolor(List l) {
+    List<Color> ans = List.filled(l.length, Colors.red);
+    for (int i = 0; i < l.length; i++) {
+      ans[i] = Color(int.parse(l[i], radix: 16));
+    }
+    return ans;
+  }
+
+  List<String> getColorValues(String colorString) {
+    String colorsSubstring = colorString.substring(10, colorString.length - 1);
+    List<String> colorValues = colorsSubstring.split(', ');
+    colorValues = colorValues.map((color) => color.replaceAll(RegExp('[^a-zA-Z0-9]'), '')).toList();
+    return colorValues;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+
+
+
+  getData() async {
+
+    try {
+      CollectionReference collRef = FirebaseFirestore.instance.collection('card');
+      await collRef.get().then((querySnapshot) {
+        for (var result in querySnapshot.docs) {
+          print(getColorValues(result.data().toString()));
+          _list.add(_string_to_hexcolor(getColorValues(result.data().toString())));
+          // print(result.data());
+        }
+      });
+
+      return _list;
+    } catch(e) {
+      print(e);
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
-    _list = [_list1, _list2,];
+
     return Scaffold(
       body: Column(
         //crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          SizedBox(
-            height: screenHeight * 0.1,
-            width: screenWidth,
-            child: Row(
-              children: <Widget>[
-                Expanded(flex: 60, child: Text("Color Palette Explorer")),
-                Expanded(flex: 20, child: TextButton(child: Text("Generate"), onPressed: () { Navigator.of(context).pushNamed('/generate'); },)),
-                Expanded(flex: 10, child: TextButton(child: Text("Sign in"), onPressed: () {  },)),
-                Expanded(flex: 10, child: TextButton(child: Text("Sign up"), onPressed: () {  },)),
-              ],
-            ),
-          ),
+          Header(screenHeight: screenHeight, screenWidth: screenWidth,),
           SizedBox(
             height: screenHeight * 0.35,
             width: screenWidth,
@@ -197,42 +230,85 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
-          Expanded(child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              mainAxisSpacing: 5,
-              crossAxisSpacing: 5,
-              childAspectRatio: 2 / 1,
-            ),
-            padding: EdgeInsets.zero,
-            itemCount: _list.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: List.generate(_list[index].length, (ind) {
-                  return Container(
-                    height: 125,
-                    width: is_hovered[0] == -1 ? 68 : is_hovered[0] != index ? 68 : is_hovered[1] == ind ? 68 * 2 : 51,
-                    child: MouseRegion(
-                      onEnter: (details) => setState(() { is_hovered[0] = index; is_hovered[1] = ind;}),
-                      onExit: (details) => setState(() {
-                        is_hovered[0] = -1;
-                        is_hovered[1] = -1;
-                      }),
-                      child: Container(
-                        child: Center(
-                            child: Text((is_hovered[0] == index && is_hovered[1] == ind) ? ColorToHex(_list[index][ind]).toString() : "", textAlign: TextAlign.center,)),
-                        color: _list[index][ind],
-                      ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance.collection('card').snapshots(),
+              builder: (_, snapshot) {
+                if (snapshot.hasError) return Text('Error = ${snapshot.error}');
+                if (snapshot.hasData) {
+                  return GridView.builder(
+                    //shrinkWrap: true,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      mainAxisSpacing: 5,
+                      crossAxisSpacing: 5,
+                      childAspectRatio: 2 / 1,
                     ),
+                    padding: EdgeInsets.zero,
+                    itemCount: _list.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: List.generate(_list[index].length, (ind) {
+                          return Container(
+                            height: 125,
+                            width: is_hovered[0] == -1 ? 68 : is_hovered[0] != index ? 68 : is_hovered[1] == ind ? 68 * 2 : 51,
+                            child: MouseRegion(
+                              onEnter: (details) => setState(() { is_hovered[0] = index; is_hovered[1] = ind;}),
+                              onExit: (details) => setState(() {
+                                is_hovered[0] = -1;
+                                is_hovered[1] = -1;
+                              }),
+
+                              child: GestureDetector(
+                                onTap: () async {
+                                  await Clipboard.setData(ClipboardData(text: (_list[index][ind]).value.toRadixString(16)));
+                                  },
+                                child: GestureDetector(
+                                  onTap: () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          Future.delayed(const Duration(seconds: 1), () {
+                                            Navigator.of(context).pop(true);
+                                          });
+
+                                          return const AlertDialog(
+                                            backgroundColor: Colors.transparent,
+                                            contentPadding: EdgeInsets.zero,
+                                            elevation: 0.0,
+                                            content: Column(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                                Text('color copied to the clipboard'),
+                                              ],
+                                            ),
+                                          );
+                                        }
+                                    );
+                                  },
+                                  child: Container(
+                                    child: Center(
+                                        child: Text((is_hovered[0] == index && is_hovered[1] == ind) ? (_list[index][ind]).value.toRadixString(16) : "",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(color: Colors.white, fontSize: 21),)),
+                                    color: _list[index][ind],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        ),
+
+                      );
+                    },
                   );
                 }
-                ),
-
-              );
-            },
-          ),
+                return Center(child: CircularProgressIndicator());
+              },
+            ),
           ),
         ],
       ),

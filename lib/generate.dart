@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'main.dart';
 
@@ -10,10 +11,8 @@ class Generate extends StatelessWidget {
     return MaterialApp(
       initialRoute: '/generate',
       routes: {
-        '/': (context) => MyHomePage(
-
-            ),
-        '/generate': (context) => GeneratePage(title: '',),
+        '/': (context) => MyHomePage(),
+        '/generate': (context) => GeneratePage(),
       },
       debugShowCheckedModeBanner: false,
       title: 'N factorial',
@@ -26,9 +25,7 @@ class Generate extends StatelessWidget {
 }
 
 class GeneratePage extends StatefulWidget {
-  const GeneratePage({super.key, required this.title});
-
-  final String title;
+  const GeneratePage({super.key});
 
   @override
   State<GeneratePage> createState() => _GeneratePageState();
@@ -38,9 +35,7 @@ class _GeneratePageState extends State<GeneratePage> {
 
   int _index = -1;
 
-  final List<Color> _shaded_colors = [
 
-  ];
 
 
   final List<Color> _colors = [
@@ -78,6 +73,14 @@ class _GeneratePageState extends State<GeneratePage> {
       _shadedColor?[i] = _calculateShadedColor(_shadeSliderPosition![i], i)!;
     }
      */
+  }
+
+  _colors_to_strings(List<Color> l) {
+    List<String> ans = List.filled(5, "");
+    for (int i = 0; i < 5; i++) {
+      ans[i] = l[i].value.toRadixString(16);
+    }
+    return ans;
   }
 
   _colorChangeHandler(double position, ind) {
@@ -200,8 +203,17 @@ class _GeneratePageState extends State<GeneratePage> {
                 Expanded(
                     flex: 20,
                     child: TextButton(
-                      child: Text("Generate"),
-                      onPressed: () {},
+                      child: Text("Publish!"),
+                      onPressed: () {
+                        print(_colors_to_strings(_shadedColor!));
+                        CollectionReference collRef = FirebaseFirestore.instance.collection('card');
+                        collRef.add({
+                          'colors' : _colors_to_strings(_shadedColor!)
+                        });
+
+                        Navigator.of(context).pushNamed('/');
+                        // Navigator.pop(context);
+                      },
                     )),
                 Expanded(
                     flex: 10,
