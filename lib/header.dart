@@ -23,8 +23,10 @@ class Page extends State<Header> {
               onPressed: () {  },
               child: Text("Color Palette Explorer"))),
           Expanded(flex: 20, child: TextButton(child: Text("Generate"), onPressed: () { Navigator.of(context).pushNamed('/generate'); },)),
+          /*
           Expanded(flex: 10, child: TextButton(child: Text("Sign in"), onPressed: () {  },)),
           Expanded(flex: 10, child: TextButton(child: Text("Sign up"), onPressed: () {  },)),
+          */
         ],
       ),
     );

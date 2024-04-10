@@ -59,6 +59,8 @@ class _GeneratePageState extends State<GeneratePage> {
   List<Color>? _currentColor;
   List<Color>? _shadedColor;
 
+  late TextEditingController _textController;
+
 
   @override
   initState() {
@@ -66,6 +68,8 @@ class _GeneratePageState extends State<GeneratePage> {
     _currentColor = List<Color>.filled(5, Colors.black);
     _shadeSliderPosition = List<double>.filled(5, 0.0);
     _shadedColor = List<Color>.filled(5, Colors.black);
+
+    _textController = TextEditingController();
     /*
     for (int i = 0; i < 5; i++) {
       _currentColor?[i] = _calculateSelectedColor(_colorSliderPosition[i], i)!;
@@ -75,6 +79,12 @@ class _GeneratePageState extends State<GeneratePage> {
      */
   }
 
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
   _colors_to_strings(List<Color> l) {
     List<String> ans = List.filled(5, "");
     for (int i = 0; i < 5; i++) {
@@ -82,7 +92,6 @@ class _GeneratePageState extends State<GeneratePage> {
     }
     return ans;
   }
-
   _colorChangeHandler(double position, ind) {
     //handle out of bounds positions
     if (position > _width) {
@@ -156,7 +165,8 @@ class _GeneratePageState extends State<GeneratePage> {
     double remainder = positionInColorArray - index;
     if (remainder == 0.0) {
       _currentColor?[ind] = _colors[index];
-    } else {
+    }
+    else {
       //calculate new color
       int redValue = _colors[index].red == _colors[index + 1].red
           ? _colors[index].red
@@ -204,17 +214,51 @@ class _GeneratePageState extends State<GeneratePage> {
                     flex: 20,
                     child: TextButton(
                       child: Text("Publish!"),
-                      onPressed: () {
-                        print(_colors_to_strings(_shadedColor!));
-                        CollectionReference collRef = FirebaseFirestore.instance.collection('card');
-                        collRef.add({
-                          'colors' : _colors_to_strings(_shadedColor!)
-                        });
+                      onPressed: () async {
+                        final res = await showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text('Add a new color palette'),
+                                content: TextField(
+                                  controller: _textController,
+                                  autofocus: true,
+                                  decoration: const InputDecoration(
+                                      hintText: "Enter your name"),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    child: Text('Cancel'),
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                  ),
+                                  TextButton(
+                                    child: Text('Add'),
+                                    onPressed: () {
+                                      Navigator.pop(context, _textController.text);
+                                    },
+                                  ),
+                                ],
+                              );
+                            }
+                        );
+                        if (res != null) {
+                          res as String;
+                          print(_colors_to_strings(_shadedColor!));
+                          CollectionReference collRef = FirebaseFirestore.instance.collection('card');
+                          collRef.add({
+                            'colors' : _colors_to_strings(_shadedColor!),
+                            'like' : 0,
+                            'author': res
+                          });
+                          Navigator.of(context).pushNamed('/');
+                        }
 
-                        Navigator.of(context).pushNamed('/');
                         // Navigator.pop(context);
                       },
                     )),
+                /*
                 Expanded(
                     flex: 10,
                     child: TextButton(
@@ -227,6 +271,7 @@ class _GeneratePageState extends State<GeneratePage> {
                       child: Text("Sign up"),
                       onPressed: () {},
                     )),
+                 */
               ],
             ),
           ),

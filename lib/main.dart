@@ -1,5 +1,7 @@
 
+
 import 'package:flutter/services.dart';
+import 'dart:convert';
 
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -84,6 +86,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
   List _list = [];
+  List authors = [];
+  List likes = [];
 
   _string_to_hexcolor(List l) {
     List<Color> ans = List.filled(l.length, Colors.red);
@@ -93,12 +97,10 @@ class _MyHomePageState extends State<MyHomePage> {
     return ans;
   }
 
-  List<String> getColorValues(String colorString) {
-    String colorsSubstring = colorString.substring(10, colorString.length - 1);
-    List<String> colorValues = colorsSubstring.split(', ');
-    colorValues = colorValues.map((color) => color.replaceAll(RegExp('[^a-zA-Z0-9]'), '')).toList();
-    return colorValues;
-  }
+
+
+
+
 
   @override
   void initState() {
@@ -106,24 +108,45 @@ class _MyHomePageState extends State<MyHomePage> {
     getData();
   }
 
-
-
-
   getData() async {
 
     try {
-      CollectionReference collRef = FirebaseFirestore.instance.collection('card');
-      await collRef.get().then((querySnapshot) {
-        for (var result in querySnapshot.docs) {
-          print(getColorValues(result.data().toString()));
-          _list.add(_string_to_hexcolor(getColorValues(result.data().toString())));
-          // print(result.data());
-        }
-      });
+
+      // // DatabaseReference ref = FirebaseDatabase.instance.ref().child('UsersData/$userDataUID/test');
+      // CollectionReference collRef = FirebaseFirestore.instance.ref().child();
+      // await collRef.get().then((querySnapshot) {
+      //   for (var result in querySnapshot.docs) {
+      //     print(fixFirebaseString(result.data().toString()));
+      //     Map<String, dynamic> parsedData = jsonDecode(result.data().toString());
+      //
+      //     print(_extractAuthor(parsedData));
+      //     print(_extractLikeCount(parsedData));
+      //     print(_extractColors(parsedData));
+      //     //_list.add(_string_to_hexcolor(getColorValues(result.data().toString())));
+      //     // print(result.data());
+      //   }
+      // });
+      var db = FirebaseFirestore.instance;
+      db.collection("card").get().then(
+            (querySnapshot) {
+          print("Successfully completed");
+          for (var docSnapshot in querySnapshot.docs) {
+            print('${docSnapshot.id} => ${docSnapshot.data().values}');
+            for (var e in docSnapshot.data().values) {
+              if (e is List) _list.add(_string_to_hexcolor(e));
+              if (e is String) authors.add(e);
+              if (e is int) likes.add(e);
+            }
+          }
+        },
+        onError: (e) => print("Error completing: $e"),
+      );
+
 
       return _list;
     } catch(e) {
       print(e);
+      print("I am here");
       return null;
     }
   }
@@ -138,6 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
         //crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Header(screenHeight: screenHeight, screenWidth: screenWidth,),
+          /*
           SizedBox(
             height: screenHeight * 0.35,
             width: screenWidth,
@@ -230,6 +254,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
+          */
           Expanded(
             child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
               stream: FirebaseFirestore.instance.collection('card').snapshots(),
@@ -247,61 +272,70 @@ class _MyHomePageState extends State<MyHomePage> {
                     padding: EdgeInsets.zero,
                     itemCount: _list.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: List.generate(_list[index].length, (ind) {
-                          return Container(
-                            height: 125,
-                            width: is_hovered[0] == -1 ? 68 : is_hovered[0] != index ? 68 : is_hovered[1] == ind ? 68 * 2 : 51,
-                            child: MouseRegion(
-                              onEnter: (details) => setState(() { is_hovered[0] = index; is_hovered[1] = ind;}),
-                              onExit: (details) => setState(() {
-                                is_hovered[0] = -1;
-                                is_hovered[1] = -1;
-                              }),
+                      return Column(
+                        children: <Widget>[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: List.generate(_list[index].length, (ind) {
+                              return Container(
+                                height: 125,
+                                width: is_hovered[0] == -1 ? 68 : is_hovered[0] != index ? 68 : is_hovered[1] == ind ? 68 * 2 : 51,
+                                child: MouseRegion(
+                                  cursor: SystemMouseCursors.click,
+                                  onEnter: (details) => setState(() { is_hovered[0] = index; is_hovered[1] = ind;}),
+                                  onExit: (details) => setState(() {
+                                    is_hovered[0] = -1;
+                                    is_hovered[1] = -1;
+                                  }),
 
-                              child: GestureDetector(
-                                onTap: () async {
-                                  await Clipboard.setData(ClipboardData(text: (_list[index][ind]).value.toRadixString(16)));
-                                  },
-                                child: GestureDetector(
-                                  onTap: () {
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          Future.delayed(const Duration(seconds: 1), () {
-                                            Navigator.of(context).pop(true);
-                                          });
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      await Clipboard.setData(ClipboardData(text: (_list[index][ind]).value.toRadixString(16)));
+                                    },
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              Future.delayed(const Duration(seconds: 1), () {
+                                                Navigator.of(context).pop(true);
+                                              });
 
-                                          return const AlertDialog(
-                                            backgroundColor: Colors.transparent,
-                                            contentPadding: EdgeInsets.zero,
-                                            elevation: 0.0,
-                                            content: Column(
-                                              mainAxisAlignment: MainAxisAlignment.end,
-                                              children: [
-                                                Text('color copied to the clipboard'),
-                                              ],
-                                            ),
-                                          );
-                                        }
-                                    );
-                                  },
-                                  child: Container(
-                                    child: Center(
-                                        child: Text((is_hovered[0] == index && is_hovered[1] == ind) ? (_list[index][ind]).value.toRadixString(16) : "",
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(color: Colors.white, fontSize: 21),)),
-                                    color: _list[index][ind],
+                                              return const AlertDialog(
+                                                backgroundColor: Colors.transparent,
+                                                contentPadding: EdgeInsets.zero,
+                                                elevation: 0.0,
+                                                content: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.end,
+                                                  children: [
+                                                    Text('color copied to the clipboard'),
+                                                  ],
+                                                ),
+                                              );
+                                            }
+                                        );
+                                      },
+                                      child: Container(
+                                        child: Center(
+                                            child: Text((is_hovered[0] == index && is_hovered[1] == ind) ? (_list[index][ind]).value.toRadixString(16) : "",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(color: Colors.white, fontSize: 21),)),
+                                        color: _list[index][ind],
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
+                              );
+                            }
                             ),
-                          );
-                        }
-                        ),
 
+                          ),
+                          Align(
+                            alignment: Alignment.center,
+                            child: Text(authors[index]),
+                          ),
+                        ],
                       );
                     },
                   );
