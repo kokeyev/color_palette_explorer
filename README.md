@@ -1,16 +1,19 @@
-# color_palette_explorer
+# Color Palette Explorer
 
 n factorial
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Данное веб приложение написано на flutter + firebase
 
-A few resources to get you started if this is your first Flutter project:
+Сам сайт опубликован <a href = "https://kokeyev.github.io/color_palette_app/index.html">тут</a> (заходите пж с ПК, на телефон не адаптирован)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Для запуска локально (localhost):
+* <a href = "https://docs.flutter.dev/get-started/install">Download flutter</a>
+* Run Chrome (web)
+* Ждите, зайт немного долго загружается
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+На главной странице отображается все кастомные карточки пользователей, с именами. Все карточки сохраняются в firebase. 
+Если навести мышку на карточку, то можно просмотреть hex код цвета, а если тапнуть на него, то скопировать.
+
+Чтобы сгенерировать свою карточку, необходимо нажать кнопку "Generate". Откроется другое окно, где можно будет создать свою карточку. Нажав на "Publish", откроется alertDialog где нужно ввести свое имя. Ваша карточка сохранена в firebase и Вас перекинет на главную страницу, где первая карточка будет ваша
