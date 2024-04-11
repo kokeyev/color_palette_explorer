@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'main.dart';
+import 'dart:math';
+
 
 class Generate extends StatelessWidget {
   const Generate({super.key});
@@ -70,13 +72,14 @@ class _GeneratePageState extends State<GeneratePage> {
     _shadedColor = List<Color>.filled(5, Colors.black);
 
     _textController = TextEditingController();
-    /*
+    var rng = Random();
     for (int i = 0; i < 5; i++) {
+      _colorSliderPosition[i] = rng.nextInt(250) as double;
       _currentColor?[i] = _calculateSelectedColor(_colorSliderPosition[i], i)!;
-      _shadeSliderPosition?[i] = _width / 2; //center the shader selector
+      _shadeSliderPosition?[i] = rng.nextInt(250) as double;
       _shadedColor?[i] = _calculateShadedColor(_shadeSliderPosition![i], i)!;
     }
-     */
+
   }
 
   @override
@@ -209,7 +212,11 @@ class _GeneratePageState extends State<GeneratePage> {
             width: screenWidth,
             child: Row(
               children: <Widget>[
-                Expanded(flex: 60, child: Text("Color Palette Explorer")),
+                Expanded(flex: 60, child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/');
+                    },
+                    child: Text("Color Palette Explorer"))),
                 Expanded(
                     flex: 20,
                     child: TextButton(
