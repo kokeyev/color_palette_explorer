@@ -7,8 +7,9 @@ n factorial
 ### Данное веб приложение написано на flutter + firebase
 
 Сам сайт опубликован <a href = "https://kokeyev.github.io/color_palette_app/index.html">тут</a> (заходите пж с ПК, на телефон не адаптирован)
+это другой репозиторий чисто для публикации сайта (папка build/web), сам код находиться в этом репозитории
 
-Для запуска локально (localhost):
+### Для запуска локально (localhost):
 * <a href = "https://developer.android.com/studio">Download Android studio</a>
 * <a href = "https://docs.flutter.dev/get-started/install">Download flutter</a>
 * Choose Chrome (web) <br>
