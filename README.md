@@ -11,9 +11,9 @@ n factorial
 Для запуска локально (localhost):
 * <a href = "[https://docs.flutter.dev/get-started/install](https://developer.android.com/studio)">Download Android studio</a>
 * <a href = "https://docs.flutter.dev/get-started/install">Download flutter</a>
-* Choose Chrome (web)
+* Choose Chrome (web) <br>
   ![image](https://github.com/kokeyev/color_palette_explorer/assets/81364897/c0669ea1-40db-49e7-8a80-1efc950eea3c)
-* Press Run "main.dart"
+* Press Run "main.dart" <br>
   ![image](https://github.com/kokeyev/color_palette_explorer/assets/81364897/104a150c-4c54-4e99-b0c4-2ce13ed88341)
 * Откроется бразуер chrome *localhost: числа* (сайт немного долго загружается). Одной из причиной не загрузки контента сайта может быть слабый интернет!
 
