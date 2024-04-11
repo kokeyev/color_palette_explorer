@@ -9,9 +9,14 @@ n factorial
 Сам сайт опубликован <a href = "https://kokeyev.github.io/color_palette_app/index.html">тут</a> (заходите пж с ПК, на телефон не адаптирован)
 
 Для запуска локально (localhost):
+* <a href = "[https://docs.flutter.dev/get-started/install](https://developer.android.com/studio)">Download Android studio</a>
 * <a href = "https://docs.flutter.dev/get-started/install">Download flutter</a>
-* Run Chrome (web)
-* Ждите, зайт немного долго загружается
+* Choose Chrome (web)
+  ![image](https://github.com/kokeyev/color_palette_explorer/assets/81364897/c0669ea1-40db-49e7-8a80-1efc950eea3c)
+* Press Run "main.dart"
+  ![image](https://github.com/kokeyev/color_palette_explorer/assets/81364897/104a150c-4c54-4e99-b0c4-2ce13ed88341)
+* Откроется бразуер chrome *localhost: числа* (сайт немного долго загружается). Одной из причиной не загрузки контента сайта может быть слабый интернет!
+
 
 На главной странице отображается все кастомные карточки пользователей, с именами. Все карточки сохраняются в firebase. 
 Если навести мышку на карточку, то можно просмотреть hex код цвета, а если тапнуть на него, то скопировать.
