@@ -6,7 +6,7 @@ n factorial
 
 ### Данное веб приложение написано на flutter + firebase
 
-Сам сайт опубликован <a href = "https://kokeyev.github.io/color_palette_app/index.html">тут</a> (заходите пж с ПК, на телефон не адаптирован)
+Сам сайт опубликован <a href = "https://kokeyev.github.io/color_palette_app/index.html">тут</a> (заходите пж с ПК, на телефон не адаптирован) <br>
 это другой репозиторий чисто для публикации сайта (папка build/web), сам код находиться в этом репозитории
 
 ### Для запуска локально (localhost):
